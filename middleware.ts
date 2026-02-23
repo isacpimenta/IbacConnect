@@ -40,20 +40,27 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  // MUDANÇA AQUI: Verificamos se a rota é EXATAMENTE '/' ou começa com '/cadastro'
-  const isLoginPage = request.nextUrl.pathname === '/'
-  const isCadastroPage = request.nextUrl.pathname.startsWith('/cadastro')
-  const isAuthPage = isLoginPage || isCadastroPage
+  const pathname = request.nextUrl.pathname
 
-  // 1. Se não houver usuário e não estiver na Login/Cadastro -> Vai para Login ('/')
-  if (!user && !isAuthPage) {
+  // ROTAS PÚBLICAS (Adicionamos o callback e a redefinição aqui)
+  const isLoginPage = pathname === '/'
+  const isCadastroPage = pathname.startsWith('/cadastro')
+  const isCallbackPage = pathname.startsWith('/auth/callback')
+  const isRedefinirPage = pathname.startsWith('/redefinir-senha')
+  
+  // Se for qualquer uma dessas, o middleware não redireciona para o login
+  const isPublicPage = isLoginPage || isCadastroPage || isCallbackPage || isRedefinirPage
+
+  // 1. Se não houver usuário e não for página pública -> Vai para Login ('/')
+  if (!user && !isPublicPage) {
     const url = request.nextUrl.clone()
     url.pathname = '/'
     return NextResponse.redirect(url)
   }
 
-  // 2. Se houver usuário e tentar acessar Login/Cadastro -> Vai para Home
-  if (user && isAuthPage) {
+  // 2. Se houver usuário e tentar acessar Login ou Cadastro -> Vai para Home
+  // (Nota: Não bloqueamos callback ou redefinir aqui para evitar loops)
+  if (user && (isLoginPage || isCadastroPage)) {
     const url = request.nextUrl.clone()
     url.pathname = '/home'
     return NextResponse.redirect(url)
