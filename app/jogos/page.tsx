@@ -66,7 +66,7 @@ export default function TelaJogos() {
   return (
     <main className="relative h-screen w-full flex flex-col items-center bg-white overflow-hidden">
       {/* Backgrounds - Agora Claros */}
-      <div className="fixed inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: "url('/fundo-igreja.jpg')" }} />
+      <div className="fixed inset-0 z-0 bg-cover bg-center opacity-10" style={{ backgroundImage: "url('/fundo-igreja.png')" }} />
       <div className="fixed inset-0 z-10 bg-white/90 backdrop-blur-md" />
 
       <div className="relative z-20 w-full max-w-[400px] flex flex-col h-full">

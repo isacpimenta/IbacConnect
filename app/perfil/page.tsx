@@ -1,124 +1,58 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  MessageCircle, Instagram, MapPin, Users, User, 
-  Edit3, X, Save, Disc, Camera, Loader2, LogOut 
+  User, Camera, Mail, Instagram, MessageCircle, 
+  MapPin, LogOut, Check, Pencil, Loader2, 
+  Users, Video, Sparkles, ChevronLeft 
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-export default function PerfilUsuario() {
+export default function PerfilPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [perfil, setPerfil] = useState<any>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [editNome, setEditNome] = useState("");
-  const [editInsta, setEditInsta] = useState("");
-  const [editDiscord, setEditDiscord] = useState("");
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     fetchPerfil();
   }, []);
 
   async function fetchPerfil() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data } = await supabase.from('perfis').select('*').eq('id', user.id).single();
-      if (data) {
-        setPerfil(data);
-        setEditNome(data.nome_completo || "");
-        setEditInsta(data.instagram || "");
-        setEditDiscord(data.discord || "");
-      }
-    } else {
-      router.push("/");
-    }
-    setLoading(false);
-  }
-
-  const handleAcessarComunidade = async () => {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.push("/"); return; }
-
-    const { data: p } = await supabase.from('perfis').select('interesses').eq('id', user.id).single();
-
-    if (!p?.interesses || p.interesses.length === 0) {
-      router.push("/interesses");
-    } else {
-      router.push("/mural");
-    }
-    setLoading(false);
-  };
-
-  async function handleLogout() {
-    const confirmar = confirm("Deseja realmente sair da sua conta?");
-    if (confirmar) {
-      await supabase.auth.signOut();
+    if (!user) {
       router.push("/");
-    }
-  }
-
-  async function handleUploadFoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-    const filePath = fileName;
-
-    const { error: uploadError } = await supabase.storage
-      .from('fotos_perfil')
-      .upload(filePath, file);
-
-    if (uploadError) {
-      alert("Erro no upload: " + uploadError.message);
-      setIsSaving(false);
       return;
     }
 
-    const { data: { publicUrl } } = supabase.storage.from('fotos_perfil').getPublicUrl(filePath);
-
-    const { error: updateError } = await supabase
+    const { data, error } = await supabase
       .from('perfis')
-      .update({ foto_url: publicUrl })
-      .eq('id', user.id);
+      .select('*')
+      .eq('id', user.id)
+      .single();
 
-    if (!updateError) await fetchPerfil();
-    setIsSaving(false);
+    if (data) setPerfil(data);
+    setLoading(false);
   }
 
-  const formatarLinkWhatsApp = (numero: string) => {
-    if (!numero) return "#";
-    const apenasNumeros = numero.replace(/\D/g, "");
-    return `https://wa.me/${apenasNumeros.startsWith("55") ? apenasNumeros : `55${apenasNumeros}`}`;
-  };
-
   async function handleSave() {
-    setIsSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { error } = await supabase.from('perfis').update({
-        nome_completo: editNome,
-        instagram: editInsta,
-        discord: editDiscord,
-      }).eq('id', user.id);
+    setSaving(true);
+    const { error } = await supabase
+      .from('perfis')
+      .update(perfil)
+      .eq('id', perfil.id);
 
-      if (!error) {
-        setIsEditing(false);
-        await fetchPerfil();
-      }
-    }
-    setIsSaving(false);
+    if (!error) setEditMode(false);
+    setSaving(false);
+  }
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.push("/");
   }
 
   if (loading) return (
@@ -128,138 +62,140 @@ export default function PerfilUsuario() {
   );
 
   return (
-    <main className="relative min-h-screen w-full flex flex-col items-center bg-[#F8F8F8] pb-32">
-      {/* Banner Superior */}
-      <div className="relative w-full h-48 bg-cover bg-center" style={{ backgroundImage: "url('/fundo-igreja.jpg')" }}>
-        <div className="absolute inset-0 bg-black/40" />
-        
-        {/* Botões de topo */}
-        <div className="absolute top-6 left-6 right-6 flex justify-between z-20">
-            <button onClick={handleLogout} className="p-3 bg-white/10 backdrop-blur-md rounded-full text-white active:scale-95 transition-all">
-                <LogOut size={20} />
-            </button>
-            <button onClick={() => setIsEditing(true)} className="p-3 bg-white/20 backdrop-blur-md rounded-full text-white">
-                <Edit3 size={20} />
-            </button>
+    <main className="min-h-screen w-full bg-[#F8F9FA] pb-32">
+      {/* Header Fixo */}
+      <div className="w-full bg-white/80 backdrop-blur-md p-6 flex items-center justify-between border-b sticky top-0 z-40">
+        <div className="flex items-center gap-4">
+          <Link href="/home" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <ChevronLeft size={24} className="text-gray-600" />
+          </Link>
+          <h1 className="text-lg font-black uppercase tracking-tighter text-gray-800">Meu Perfil</h1>
         </div>
+        <button 
+          onClick={() => editMode ? handleSave() : setEditMode(true)}
+          className={`px-4 py-2 rounded-full text-[10px] font-black uppercase transition-all ${
+            editMode ? "bg-green-500 text-white" : "bg-ibac-dark text-white"
+          }`}
+        >
+          {saving ? <Loader2 className="animate-spin" size={14} /> : editMode ? "Salvar" : "Editar"}
+        </button>
       </div>
 
-      <div className="relative z-10 w-full max-w-[400px] px-6 -mt-16 flex flex-col items-center">
+      <div className="max-w-[400px] mx-auto p-6 space-y-6">
         
-        {/* Container da Foto com Lógica de Ícone Fallback */}
-        <div className="relative group cursor-pointer" onClick={() => isEditing && fileInputRef.current?.click()}>
-            <div className={`w-32 h-32 rounded-3xl bg-white p-1 shadow-2xl transition-all ${isEditing && "ring-4 ring-ibac-orange"}`}>
-                <div className="w-full h-full rounded-[22px] bg-gray-100 overflow-hidden relative flex items-center justify-center">
-                    {perfil?.foto_url ? (
-                        <img src={perfil.foto_url} alt="Foto" className="w-full h-full object-cover" />
-                    ) : (
-                        <div className="flex flex-col items-center text-gray-300">
-                            <User size={50} strokeWidth={1.5} />
-                            <span className="text-[7px] font-black uppercase">Sem Foto</span>
-                        </div>
-                    )}
-                    
-                    {isEditing && (
-                        <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white">
-                            {isSaving ? <Loader2 className="animate-spin" /> : (
-                                <>
-                                    <Camera size={24} />
-                                    <span className="text-[8px] font-black uppercase mt-1">Alterar</span>
-                                </>
-                            )}
-                        </div>
-                    )}
+        {/* Card de Avatar */}
+        <div className="flex flex-col items-center">
+          <div className="relative group">
+            <div className="w-32 h-32 rounded-[40px] bg-white shadow-xl overflow-hidden border-4 border-white">
+              {perfil?.foto_url ? (
+                <img src={perfil.foto_url} className="w-full h-full object-cover" alt="" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300">
+                  <User size={48} />
                 </div>
+              )}
             </div>
-            <input type="file" ref={fileInputRef} onChange={handleUploadFoto} className="hidden" accept="image/*" />
-        </div>
-
-        <div className="text-center mt-4">
-          <h1 className="text-2xl font-black uppercase text-ibac-dark leading-tight">{perfil?.nome_completo || "Usuário"}</h1>
-          <p className="flex items-center justify-center gap-1 text-gray-400 text-[10px] font-bold uppercase tracking-widest mt-1">
-            <MapPin size={12} className="text-ibac-orange" /> IBAC CENTRAL
-          </p>
-        </div>
-
-        <div className="w-full mt-6 flex flex-wrap justify-center gap-2">
-            {perfil?.interesses?.map((item: string) => (
-              <span key={item} className="px-4 py-1.5 bg-white border border-gray-100 rounded-full text-[9px] font-black uppercase text-ibac-orange shadow-sm">{item}</span>
-            ))}
-        </div>
-
-        {/* Links Sociais */}
-        <div className="grid grid-cols-1 gap-3 w-full mt-8">
-          <a href={formatarLinkWhatsApp(perfil?.whatsapp)} target="_blank" className="flex items-center justify-center gap-3 bg-[#25D366] text-white py-4 rounded-2xl shadow-lg font-black uppercase text-[10px] active:scale-95 transition-transform">
-            <MessageCircle size={18} fill="white" /> WhatsApp
-          </a>
-          <div className="grid grid-cols-2 gap-3">
-            <a href={perfil?.instagram ? `https://instagram.com/${perfil.instagram.replace('@', '')}` : "#"} className={`flex items-center justify-center gap-2 py-4 rounded-2xl shadow-lg font-black uppercase text-[10px] ${perfil?.instagram ? 'bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}>
-                <Instagram size={18} /> Instagram
-            </a>
-            <a href={perfil?.discord ? `https://discord.com/users/${perfil.discord}` : "#"} className={`flex items-center justify-center gap-2 py-4 rounded-2xl shadow-lg font-black uppercase text-[10px] ${perfil?.discord ? 'bg-[#5865F2] text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}>
-                <Disc size={18} /> Discord
-            </a>
+            {editMode && (
+              <label className="absolute bottom-0 right-0 w-10 h-10 bg-ibac-orange rounded-2xl flex items-center justify-center text-white border-4 border-white cursor-pointer shadow-lg">
+                <Camera size={18} />
+                <input type="file" className="hidden" />
+              </label>
+            )}
           </div>
+          <h2 className="mt-4 text-xl font-black text-gray-800 uppercase tracking-tighter">{perfil?.nome_completo}</h2>
+          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">{perfil?.cidade || "IBAC Membro"}</span>
         </div>
 
-        {/* Modal de Edição */}
-        <AnimatePresence>
-          {isEditing && (
-            <>
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsEditing(false)} className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm" />
-              <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} className="fixed bottom-0 left-0 right-0 z-[70] w-full bg-white rounded-t-[40px] p-8 pb-12 shadow-[0_-10px_40px_rgba(0,0,0,0.2)]">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="font-black uppercase text-xl italic text-ibac-orange tracking-tighter">Editar Perfil</h2>
-                  <button onClick={() => setIsEditing(false)} className="p-2 bg-gray-100 rounded-full"><X size={20}/></button>
-                </div>
-                <div className="space-y-4">
-                  <div className="text-center mb-2">
-                    <button onClick={() => fileInputRef.current?.click()} className="text-[10px] font-black uppercase text-ibac-orange underline">Trocar Foto de Perfil</button>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase text-gray-400 ml-2">Nome Completo</label>
-                    <input value={editNome} onChange={(e) => setEditNome(e.target.value)} placeholder="Ex: João Silva" className="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 ring-ibac-orange/20 transition-all font-medium" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase text-gray-400 ml-2">Instagram (sem @)</label>
-                    <input value={editInsta} onChange={(e) => setEditInsta(e.target.value)} placeholder="Ex: ibac_central" className="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 ring-ibac-orange/20 transition-all font-medium" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase text-gray-400 ml-2">Discord ID</label>
-                    <input value={editDiscord} onChange={(e) => setEditDiscord(e.target.value)} placeholder="Ex: joao#1234" className="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 ring-ibac-orange/20 transition-all font-medium" />
-                  </div>
-                </div>
-                <button onClick={handleSave} disabled={isSaving} className="w-full mt-8 py-5 bg-ibac-orange text-white font-black uppercase rounded-full shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all">
-                  {isSaving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />} Salvar Alterações
-                </button>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
-
-        {/* Menu Inferior */}
-        <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] bg-ibac-dark rounded-full py-3 px-10 flex justify-between items-center shadow-2xl z-50">
-          <Link href="/home">
-            <motion.div whileTap={{ y: -2 }} className="opacity-40 flex flex-col items-center">
-              <img src="/logo-white.png" alt="Home" className="w-5 h-5 object-contain" />
-              <span className="text-[7px] font-black uppercase mt-1 text-white italic">Home</span>
-            </motion.div>
-          </Link>
-          
-          <Link href="/perfil">
-            <div className="w-14 h-14 bg-ibac-orange rounded-full flex items-center justify-center -mt-14 border-[6px] border-[#F8F8F8] shadow-lg">
-              <User className="text-white" size={24} />
+        {/* Campos de Edição / Informação */}
+        <div className="space-y-4">
+          <section className="bg-white rounded-[32px] p-6 shadow-sm border border-gray-100 space-y-5">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-[11px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
+                <Sparkles size={14} className="text-ibac-orange" /> Dados Pessoais
+              </h3>
             </div>
-          </Link>
-          
-          <button onClick={handleAcessarComunidade} className="opacity-40 flex flex-col cursor-pointer items-center text-white outline-none">
-            <motion.div whileTap={{ y: -2 }} className="flex flex-col items-center">
-              <Users size={22} />
-              <span className="text-[7px] font-black uppercase mt-1 italic">Mural</span>
-            </motion.div>
+
+            {/* Input Nome */}
+            <div className="space-y-1">
+              <label className="text-[9px] font-black text-gray-400 uppercase ml-1">Nome Completo</label>
+              <input 
+                disabled={!editMode}
+                value={perfil?.nome_completo || ""}
+                onChange={(e) => setPerfil({...perfil, nome_completo: e.target.value})}
+                className={`w-full h-12 px-4 rounded-2xl text-sm font-bold transition-all ${
+                  editMode ? "bg-gray-50 border-orange-100 border focus:ring-2 ring-ibac-orange/20 outline-none" : "bg-transparent border-transparent"
+                }`}
+              />
+            </div>
+
+            {/* Input WhatsApp */}
+            <div className="space-y-1">
+              <label className="text-[9px] font-black text-gray-400 uppercase ml-1 text-green-600">WhatsApp</label>
+              <div className="relative">
+                <input 
+                  disabled={!editMode}
+                  value={perfil?.whatsapp || ""}
+                  onChange={(e) => setPerfil({...perfil, whatsapp: e.target.value})}
+                  className={`w-full h-12 px-4 rounded-2xl text-sm font-bold transition-all pl-10 ${
+                    editMode ? "bg-gray-50 border-green-100 border outline-none" : "bg-transparent border-transparent"
+                  }`}
+                />
+                <MessageCircle size={16} className="absolute left-4 top-4 text-green-500" />
+              </div>
+            </div>
+
+            {/* Input Instagram */}
+            <div className="space-y-1">
+              <label className="text-[9px] font-black text-gray-400 uppercase ml-1 text-pink-600">Instagram</label>
+              <div className="relative">
+                <input 
+                  disabled={!editMode}
+                  placeholder="@seuusuario"
+                  value={perfil?.instagram || ""}
+                  onChange={(e) => setPerfil({...perfil, instagram: e.target.value})}
+                  className={`w-full h-12 px-4 rounded-2xl text-sm font-bold transition-all pl-10 ${
+                    editMode ? "bg-gray-50 border-pink-100 border outline-none" : "bg-transparent border-transparent"
+                  }`}
+                />
+                <Instagram size={16} className="absolute left-4 top-4 text-pink-500" />
+              </div>
+            </div>
+          </section>
+
+          {/* Botão Logout */}
+          <button 
+            onClick={handleLogout}
+            className="w-full py-4 bg-white rounded-[24px] border border-red-50 text-red-500 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 active:bg-red-50 transition-colors"
+          >
+            <LogOut size={16} /> Sair da Conta
           </button>
-        </nav>
+        </div>
       </div>
+
+      {/* RODAPÉ PADRONIZADO (4 BOTÕES) */}
+      <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-[380px] bg-ibac-dark rounded-full py-3 px-6 flex justify-between items-center shadow-2xl z-50">
+        <Link href="/mural" className="text-white/40 flex flex-col items-center flex-1">
+            <Users size={20} />
+            <span className="text-[7px] font-black uppercase mt-0.5 tracking-tighter">Mural</span>
+        </Link>
+        <Link href="/aulas" className="text-white/40 flex flex-col items-center flex-1">
+            <Video size={20} />
+            <span className="text-[7px] font-black uppercase mt-0.5 tracking-tighter">Aulas</span>
+        </Link>
+        <Link href="/home" className="relative px-2">
+            <div className="w-14 h-14 bg-ibac-orange rounded-full flex items-center justify-center -mt-14 border-[6px] border-[#F8F9FA] shadow-lg">
+                <img src="/logo-white.png" alt="Home" className="w-8 h-8 object-contain" />
+            </div>
+        </Link>
+        <Link href="/fotos" className="text-white/40 flex flex-col items-center flex-1">
+            <Camera size={20} />
+            <span className="text-[7px] font-black uppercase mt-0.5 tracking-tighter">Fotos</span>
+        </Link>
+        <Link href="/perfil" className="text-ibac-orange flex flex-col items-center flex-1">
+            <User size={20} />
+            <span className="text-[7px] font-black uppercase mt-0.5 tracking-tighter">Perfil</span>
+        </Link>
+      </nav>
     </main>
   );
 }

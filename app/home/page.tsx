@@ -1,7 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Users, User, Loader2, Instagram, Camera } from "lucide-react"; // Importei Instagram e Camera
+import { 
+  ArrowRight, 
+  Users, 
+  User, 
+  Loader2, 
+  Instagram, 
+  Video, 
+  Camera 
+} from "lucide-react"; 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -69,15 +77,16 @@ export default function HomeIgreja() {
   };
 
   return (
-    <main className="relative min-h-screen w-full flex flex-col items-center overflow-x-hidden bg-white">
-      <div className="fixed inset-0 z-0 bg-cover bg-center opacity-40" style={{ backgroundImage: "url('/fundo-igreja.jpg')" }} />
+    <main className="relative min-h-screen w-full flex flex-col items-center overflow-x-hidden bg-white pb-32">
+      {/* Background Decorativo */}
+      <div className="fixed inset-0 z-0 bg-cover bg-center opacity-10" style={{ backgroundImage: "url('/fundo-igreja.png')" }} />
 
       <div className="relative z-10 w-full max-w-[400px] flex flex-col min-h-screen">
         <header className="flex justify-center pt-10 mb-6">
           <img src="/logo.png" alt="IBAC" className="w-20" />
         </header>
 
-        {/* Galeria Flickr */}
+        {/* Galeria Flickr (Preview) */}
         <div className="flex items-center justify-center gap-2 px-4 mb-4 h-64">
           {!mounted || (loadingFlickr && fotosFlickr.length === 0) ? (
             <div className="flex items-center justify-center gap-2 w-full">
@@ -90,11 +99,9 @@ export default function HomeIgreja() {
               <motion.div 
                 key={foto.id} 
                 layoutId={foto.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
                 className={`relative rounded-lg overflow-hidden shadow-2xl transition-all duration-500 ${foto.destaque ? "z-20 w-48 h-56 border-2 border-white" : "z-10 w-32 h-44 opacity-80"}`}
               >
-                <img src={foto.img} className="w-full h-full object-cover" alt="" loading="lazy" />
+                <img src={foto.img} className="w-full h-full object-cover" alt="" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent p-3 flex flex-col justify-end">
                   <p className="text-[7px] font-black text-white uppercase leading-tight line-clamp-2">{foto.titulo}</p>
                 </div>
@@ -103,23 +110,15 @@ export default function HomeIgreja() {
           )}
         </div>
 
-        {/* NOVOS BOTÕES: Ações Rápidas */}
+        {/* Ações Rápidas - Botão de Fotos removido daqui */}
         <div className="flex justify-center gap-3 px-6 mb-8">
           <a 
-            href="https://www.instagram.com/batista_acolher" // Altere para o seu @
+            href="https://www.instagram.com/batista_acolher"
             target="_blank"
-            className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/20 backdrop-blur-md border border-white/30 rounded-2xl shadow-sm active:scale-95 transition-all"
+            className="flex-1 flex items-center justify-center gap-2 py-4 bg-white/20 backdrop-blur-md border border-white/30 rounded-2xl shadow-sm active:scale-95 transition-all"
           >
-            <Instagram size={16} className="text-pink-600" />
-            <span className="text-[9px] font-black uppercase text-gray-700 tracking-widest">Instagram</span>
-          </a>
-          <a 
-            href={`https://www.flickr.com/photos/${FLICKR_USER_ID}`}
-            target="_blank"
-            className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/20 backdrop-blur-md border border-white/30 rounded-2xl shadow-sm active:scale-95 transition-all"
-          >
-            <Camera size={16} className="text-blue-500" />
-            <span className="text-[9px] font-black uppercase text-gray-700 tracking-widest">Ver Fotos</span>
+            <Instagram size={18} className="text-pink-600" />
+            <span className="text-[10px] font-black uppercase text-gray-700 tracking-widest">Instagram</span>
           </a>
         </div>
 
@@ -128,30 +127,44 @@ export default function HomeIgreja() {
           <h3 className="text-xl font-medium uppercase tracking-tighter text-gray-700">UMA FAMÍLIA PARA <span className="text-ibac-orange font-black">PERTENCER</span></h3>
         </div>
 
-        <div className="flex justify-center mb-20">
+        {/* Botão Central de Mural */}
+        <div className="flex justify-center mb-10">
             <motion.button 
               onClick={handleAcessarComunidade}
               whileTap={{ scale: 0.9 }} 
-              className="w-16 h-16 bg-ibac-orange rounded-full flex items-center justify-center text-white shadow-xl"
+              className="w-16 h-16 bg-ibac-orange rounded-full flex items-center justify-center text-white shadow-xl shadow-orange-200"
             >
               {loading ? <Loader2 className="animate-spin" /> : <ArrowRight size={35} strokeWidth={3} />}
             </motion.button>
         </div>
 
-        <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] bg-ibac-dark rounded-full py-3 px-10 flex justify-between items-center shadow-2xl z-50">
-          <button onClick={handleAcessarComunidade} className="text-white/40 flex flex-col cursor-pointer items-center outline-none">
-            <Users size={22} />
+        {/* NOVO RODAPÉ INTEGRADO */}
+        <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-[380px] bg-ibac-dark rounded-full py-3 px-6 flex justify-between items-center shadow-2xl z-50">
+          
+          <button onClick={handleAcessarComunidade} className="text-white/40 flex flex-col items-center flex-1 cursor-pointer">
+            <Users size={20} />
             <span className="text-[7px] font-black uppercase mt-0.5 tracking-tighter">Mural</span>
           </button>
 
-          <Link href="/home" className="relative">
+          <Link href="/aulas" className="text-white/40 flex flex-col items-center flex-1">
+            <Video size={20} />
+            <span className="text-[7px] font-black uppercase mt-0.5 tracking-tighter">Aulas</span>
+          </Link>
+
+          {/* Logo Home (Ativa) */}
+          <Link href="/home" className="relative px-2">
             <div className="w-14 h-14 bg-ibac-orange rounded-full flex items-center justify-center -mt-14 border-[6px] border-white shadow-lg">
                 <img src="/logo-white.png" alt="Home" className="w-8 h-8 object-contain" />
             </div>
           </Link>
 
-          <Link href="/perfil" className="text-white/40 flex flex-col items-center">
-            <User size={22} />
+          <Link href="/fotos" className="text-white/40 flex flex-col items-center flex-1">
+            <Camera size={20} />
+            <span className="text-[7px] font-black uppercase mt-0.5 tracking-tighter">Fotos</span>
+          </Link>
+
+          <Link href="/perfil" className="text-white/40 flex flex-col items-center flex-1">
+            <User size={20} />
             <span className="text-[7px] font-black uppercase mt-0.5 tracking-tighter">Perfil</span>
           </Link>
         </nav>
