@@ -5,10 +5,10 @@ import { NextResponse } from 'next/server'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/interesses'
+  // Verificamos se existe um parâmetro 'next' na URL, senão usamos o padrão
+  const next = searchParams.get('next') ?? '/home'
 
   if (code) {
-    // CORREÇÃO: No Next.js 15+, cookies() é uma Promise e exige await
     const cookieStore = await cookies()
 
     const supabase = createServerClient(
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
             cookieStore.set({ name, value, ...options })
           },
           remove(name: string, options: CookieOptions) {
-            cookieStore.set({ name, value: '', ...options })
+            cookieStore.delete({ name, ...options })
           },
         },
       }
@@ -32,10 +32,11 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!error) {
+      // Se o código foi trocado com sucesso, mandamos para o destino
       return NextResponse.redirect(`${origin}${next}`)
     }
   }
 
-  // Redireciona para uma página de erro caso a confirmação falhe
+  // Se der erro, volta para login com erro
   return NextResponse.redirect(`${origin}/login?error=auth-code-error`)
 }

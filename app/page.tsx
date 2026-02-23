@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Loader2, AlertCircle, CheckCircle2, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase"; // Seu arquivo com createBrowserClient
+import { supabase } from "@/lib/supabase"; 
 
 export default function Login() {
   const router = useRouter();
@@ -13,7 +13,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'error' | 'success', text: string } | null>(null);
 
-  // Limpeza preventiva de sessões corrompidas ao carregar a página
+  // Limpeza preventiva de sessões corrompidas
   useEffect(() => {
     const checkSession = async () => {
       try {
@@ -47,11 +47,11 @@ export default function Login() {
         setMessage({ type: 'error', text: errorMsg });
       } else if (data?.user) {
         router.push("/home");
-        router.refresh(); // Garante que o middleware veja a nova sessão
+        router.refresh(); 
       }
     } catch (err: any) {
       setMessage({ type: 'error', text: "Erro crítico no login. Limpe o cache do navegador." });
-      localStorage.clear(); // Limpa se houver erro de parsing de string
+      localStorage.clear();
     } finally {
       setLoading(false);
     }
@@ -63,8 +63,12 @@ export default function Login() {
       return;
     }
     setLoading(true);
+    setMessage(null);
+
+    // SOLUÇÃO DO REDIRECIONAMENTO:
+    // O link agora passa pelo callback para validar o código PKCE no servidor antes de ir para a página final
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/redefinir-senha`,
+      redirectTo: `${window.location.origin}/auth/callback?next=/redefinir-senha`,
     });
 
     if (error) {
@@ -78,7 +82,6 @@ export default function Login() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-8 bg-white overflow-hidden">
       
-      {/* Logo com animação suave */}
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -89,7 +92,6 @@ export default function Login() {
 
       <form onSubmit={handleLogin} className="w-full max-w-xs space-y-5">
         
-        {/* Feedback Visual para o Usuário */}
         <AnimatePresence mode="wait">
           {message && (
             <motion.div 
@@ -106,7 +108,6 @@ export default function Login() {
           )}
         </AnimatePresence>
 
-        {/* Campo E-mail */}
         <div className="space-y-1">
           <label className="font-black text-[10px] uppercase text-gray-400 ml-1">E-mail Corporativo :</label>
           <input 
@@ -119,7 +120,6 @@ export default function Login() {
           />
         </div>
 
-        {/* Campo Senha */}
         <div className="space-y-1">
           <div className="flex justify-between items-center px-1">
             <label className="font-black text-[10px] uppercase text-gray-400">Senha Segura :</label>
@@ -141,7 +141,6 @@ export default function Login() {
           />
         </div>
 
-        {/* Link para Cadastro */}
         <p className="text-center text-[10px] font-bold uppercase tracking-tight text-gray-400 pt-2">
           Novo por aqui?{" "}
           <Link href="/cadastro" className="text-[#F47920] font-black hover:underline">
@@ -149,7 +148,6 @@ export default function Login() {
           </Link>
         </p>
 
-        {/* Botão de Ação Circular */}
         <div className="flex justify-center pt-6"> 
           <motion.button
             type="submit"
@@ -163,7 +161,6 @@ export default function Login() {
         </div>
       </form>
 
-      {/* Footer Minimalista */}
       <footer className="mt-16 flex flex-col items-center gap-2 opacity-30">
         <ShieldCheck size={18} className="text-gray-400" />
         <p className="text-[7px] font-black uppercase tracking-[0.4em] text-gray-400 text-center">
