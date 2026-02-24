@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ChevronLeft, 
@@ -9,60 +9,51 @@ import {
   User, 
   Camera,
   FileText,
-  Download,
-  BookOpen,
-  ArrowRight,
   Heart,
-  Calendar as CalendarIcon
+  Loader2,
+  Calendar as CalendarIcon,
+  Youtube
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-const CONTEUDOS = [
-  {
-    id: "1",
-    tipo: "PREGAÇÃO",
-    titulo: "O Poder da Oração no Getsêmani",
-    autor: "Pr. Marcos Oliveira",
-    data: "Ontem",
-    capa: "https://images.unsplash.com/photo-1515162305285-0293e4767cc2?q=80&w=500",
-    temVideo: true,
-    temSlide: true,
-    linkVideo: "#",
-    linkSlide: "#"
-  },
-  {
-    id: "2",
-    tipo: "EBD",
-    titulo: "Epístola aos Romanos: Graça e Fé",
-    autor: "Prof. Ricardo Silva",
-    data: "Domingo",
-    capa: "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=500",
-    temVideo: false,
-    temSlide: true,
-    linkSlide: "#",
-    resumo: "Estudo profundo sobre a justificação pela fé no capítulo 5."
-  },
-  {
-    id: "3",
-    tipo: "PREGAÇÃO",
-    titulo: "Vivendo como Família de Deus",
-    autor: "Pr. Marcos Oliveira",
-    data: "12 Fev",
-    capa: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=500",
-    temVideo: true,
-    temSlide: false,
-    linkVideo: "#"
-  }
-];
+import { supabase } from "@/lib/supabase";
 
 export default function AulasPage() {
   const [abaAtiva, setAbaAtiva] = useState("TODOS");
+  const [conteudos, setConteudos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const pathname = usePathname();
 
+  useEffect(() => {
+    async function fetchAulas() {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('aulas')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setConteudos(data || []);
+      } catch (err) {
+        console.error("Erro ao carregar aulas:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchAulas();
+  }, []);
+
   const conteudosFiltrados = abaAtiva === "TODOS" 
-    ? CONTEUDOS 
-    : CONTEUDOS.filter(c => c.tipo === abaAtiva);
+    ? conteudos 
+    : conteudos.filter(c => c.categoria.toUpperCase() === abaAtiva);
+
+  // Função para pegar a thumb do YouTube
+  const getYoutubeThumb = (url: string) => {
+    if (!url) return null;
+    const videoId = url.split('v=')[1]?.split('&')[0] || url.split('/').pop();
+    return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+  };
 
   return (
     <main className="min-h-screen w-full flex flex-col items-center bg-[#F8F9FA] pb-32">
@@ -72,21 +63,21 @@ export default function AulasPage() {
           <ChevronLeft size={24} className="text-gray-600" />
         </Link>
         <h1 className="text-lg font-black uppercase tracking-tighter text-gray-800">
-          Estudos & <span className="text-ibac-orange">Recursos</span>
+          Estudos & <span className="text-[#F47920]">Recursos</span>
         </h1>
       </div>
 
       <div className="w-full max-w-[400px] p-4 space-y-6">
         
-        {/* Filtros Estilizados */}
-        <div className="flex bg-gray-100 p-1 rounded-2xl">
+        {/* Filtros */}
+        <div className="flex bg-gray-200/50 p-1 rounded-2xl">
           {["TODOS", "PREGAÇÃO", "EBD"].map((tab) => (
             <button
               key={tab}
               onClick={() => setAbaAtiva(tab)}
               className={`flex-1 py-2.5 rounded-xl text-[9px] font-black uppercase transition-all ${
                 abaAtiva === tab 
-                ? "bg-white text-ibac-orange shadow-sm scale-[1.02]" 
+                ? "bg-white text-[#F47920] shadow-sm scale-[1.02]" 
                 : "text-gray-400"
               }`}
             >
@@ -97,112 +88,135 @@ export default function AulasPage() {
 
         {/* Lista de Conteúdos */}
         <div className="space-y-6">
-          <AnimatePresence mode="popLayout">
-            {conteudosFiltrados.map((item, index) => (
-              <motion.div
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                key={item.id}
-                className="bg-white rounded-[32px] overflow-hidden shadow-sm border border-gray-100"
-              >
-                {/* Área da Imagem / Preview */}
-                <div className="relative h-48 w-full">
-                  <img src={item.capa} className="w-full h-full object-cover" alt="" />
-                  
-                  {/* Badge de Tipo */}
-                  <div className="absolute top-4 left-4 px-3 py-1 bg-white/90 backdrop-blur-md rounded-full">
-                    <span className="text-[8px] font-black text-ibac-orange uppercase tracking-widest">{item.tipo}</span>
-                  </div>
-
-                  {/* Ícone Centralizado Dinâmico */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    {item.temVideo ? (
-                      <div className="w-14 h-14 bg-ibac-orange rounded-full flex items-center justify-center shadow-xl border-4 border-white/20">
-                        <Play size={24} className="text-white fill-white ml-1" />
-                      </div>
-                    ) : (
-                      <div className="w-14 h-14 bg-ibac-dark rounded-full flex items-center justify-center shadow-xl border-4 border-white/20">
-                        <BookOpen size={24} className="text-white" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Informações e Botões */}
-                <div className="p-5">
-                  <div className="mb-4">
-                    <h4 className="text-base font-black text-gray-800 leading-tight mb-1 uppercase tracking-tighter">{item.titulo}</h4>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{item.autor} • {item.data}</p>
-                    {item.resumo && <p className="mt-2 text-xs text-gray-500 leading-relaxed italic">{item.resumo}</p>}
-                  </div>
-
-                  <div className="flex gap-2">
-                    {item.temVideo && (
-                      <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-ibac-orange text-white rounded-2xl text-[9px] font-black uppercase tracking-widest active:scale-95 transition-all">
-                        <Video size={14} /> Assistir
-                      </button>
-                    )}
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-3">
+              <Loader2 className="animate-spin text-[#F47920]" size={32} />
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Carregando...</p>
+            </div>
+          ) : (
+            <AnimatePresence mode="popLayout">
+              {conteudosFiltrados.map((item) => (
+                <motion.div
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  key={item.id}
+                  className="bg-white rounded-[32px] overflow-hidden shadow-sm border border-gray-100"
+                >
+                  {/* Área da Imagem / Preview */}
+                  <div className="relative h-48 w-full bg-gray-100">
+                    <img 
+                      src={item.banner_url || getYoutubeThumb(item.video_url) || "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=500"} 
+                      className="w-full h-full object-cover" 
+                      alt="" 
+                    />
                     
-                    {item.temSlide && (
-                      <button className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-[9px] font-black uppercase tracking-widest active:scale-95 transition-all ${item.temVideo ? "bg-gray-100 text-gray-600" : "bg-ibac-dark text-white"}`}>
-                        <FileText size={14} /> {item.tipo === "EBD" ? "Ver Slides" : "Esboço"}
-                      </button>
+                    {/* Badge de Categoria */}
+                    <div className="absolute top-4 left-4 px-3 py-1 bg-white/90 backdrop-blur-md rounded-full">
+                      <span className="text-[8px] font-black text-[#F47920] uppercase tracking-widest">{item.categoria}</span>
+                    </div>
+
+                    {/* Ícone Play (Só aparece se tiver vídeo) */}
+                    {item.video_url && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <a 
+                          href={item.video_url} 
+                          target="_blank" 
+                          className="w-14 h-14 bg-[#F47920] rounded-full flex items-center justify-center shadow-xl border-4 border-white/20 active:scale-90 transition-transform"
+                        >
+                          <Play size={24} className="text-white fill-white ml-1" />
+                        </a>
+                      </div>
                     )}
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+
+                  {/* Informações e Botões */}
+                  <div className="p-5">
+                    <div className="mb-4">
+                      <h4 className="text-base font-black text-gray-800 leading-tight mb-1 uppercase tracking-tighter">
+                        {item.titulo}
+                      </h4>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                         {new Date(item.created_at).toLocaleDateString('pt-BR')}
+                      </p>
+                    </div>
+
+                    <div className="flex gap-2">
+                      {/* Botão Assistir - Só aparece se tiver vídeo */}
+                      {item.video_url ? (
+                        <a 
+                          href={item.video_url}
+                          target="_blank"
+                          className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#F47920] text-white rounded-2xl text-[9px] font-black uppercase tracking-widest active:scale-95 transition-all"
+                        >
+                          <Youtube size={14} /> Assistir
+                        </a>
+                      ) : (
+                        <div className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-50 text-gray-400 rounded-2xl text-[9px] font-black uppercase tracking-widest border border-dashed border-gray-200">
+                           Apenas Material
+                        </div>
+                      )}
+                      
+                      {/* Botão PDF - Abre o link do bucket se existir */}
+                      {item.pdf_url ? (
+                        <a 
+                          href={item.pdf_url}
+                          target="_blank"
+                          className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-900 text-white rounded-2xl text-[9px] font-black uppercase tracking-widest active:scale-95 transition-all"
+                        >
+                          <FileText size={14} /> {item.categoria === "EBD" ? "Slides" : "Esboço"}
+                        </a>
+                      ) : (
+                        <button disabled className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-50 text-gray-300 rounded-2xl text-[9px] font-black uppercase tracking-widest cursor-not-allowed">
+                          <FileText size={14} /> Sem PDF
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          )}
+
+          {!loading && conteudosFiltrados.length === 0 && (
+            <div className="text-center py-20 bg-white rounded-[32px] border border-dashed border-gray-200">
+              <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest">Nenhum estudo disponível</p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* RODAPÉ SIMÉTRICO (3 + HOME + 3) */}
+      {/* Navegação Inferior */}
       <div className="fixed bottom-6 left-0 right-0 flex justify-center px-4 z-50">
-        <nav className="w-full max-w-[440px] bg-ibac-dark rounded-[35px] py-3 px-2 flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10">
-          
-          {/* GRUPO ESQUERDA */}
-          <div className="flex flex-1 justify-around items-center">
-            <Link href="/mural" className={`flex flex-col items-center ${pathname === '/mural' ? 'text-ibac-orange' : 'text-white/30'}`}>
-                <Users size={18} />
-                <span className="text-[6px] font-bold uppercase mt-1 tracking-tighter">Mural</span>
+        <nav className="w-full max-w-[440px] bg-[#1A1A1A] rounded-[35px] py-3 px-2 flex justify-between items-center shadow-2xl border border-white/10">
+          <div className="flex flex-1 justify-around items-center text-white/30">
+            <Link href="/mural" className={`flex flex-col items-center ${pathname === '/mural' ? 'text-[#F47920]' : ''}`}>
+              <Users size={18} /><span className="text-[6px] font-bold uppercase mt-1">Mural</span>
             </Link>
-            <Link href="/aulas" className={`flex flex-col items-center ${pathname === '/aulas' ? 'text-ibac-orange' : 'text-white/30'}`}>
-                <Video size={18} />
-                <span className="text-[6px] font-bold uppercase mt-1 tracking-tighter">Aulas</span>
+            <Link href="/aulas" className={`flex flex-col items-center ${pathname === '/aulas' ? 'text-[#F47920]' : ''}`}>
+              <Video size={18} /><span className="text-[6px] font-bold uppercase mt-1">Aulas</span>
             </Link>
-            <Link href="/agenda" className={`flex flex-col items-center ${pathname === '/agenda' ? 'text-ibac-orange' : 'text-white/30'}`}>
-                <CalendarIcon size={18} />
-                <span className="text-[6px] font-bold uppercase mt-1 tracking-tighter">Agenda</span>
+            <Link href="/agenda" className={`flex flex-col items-center ${pathname === '/agenda' ? 'text-[#F47920]' : ''}`}>
+              <CalendarIcon size={18} /><span className="text-[6px] font-bold uppercase mt-1">Agenda</span>
             </Link>
           </div>
-
-          {/* HOME CENTRAL ELEVADO */}
           <div className="relative -mt-14 px-2">
-            <Link href="/home" className="block">
-              <div className="w-16 h-16 bg-[#F47920] rounded-full flex items-center justify-center border-[6px] border-[#F8F9FA] shadow-xl transform active:scale-90 transition-transform">
-                <img src="/logo-white.png" alt="Home" className="w-8 h-8 object-contain" />
-              </div>
+            <Link href="/home" className="w-16 h-16 bg-[#F47920] rounded-full flex items-center justify-center border-[6px] border-[#F8F9FA] shadow-xl">
+              <img src="/logo-white.png" alt="Home" className="w-8 h-8 object-contain" />
             </Link>
           </div>
-
-          {/* GRUPO DIREITA */}
-          <div className="flex flex-1 justify-around items-center">
-            <Link href="/fotos" className={`flex flex-col items-center ${pathname === '/fotos' ? 'text-ibac-orange' : 'text-white/30'}`}>
-                <Camera size={18} />
-                <span className="text-[6px] font-bold uppercase mt-1 tracking-tighter">Fotos</span>
+          <div className="flex flex-1 justify-around items-center text-white/30">
+            <Link href="/fotos" className={`flex flex-col items-center ${pathname === '/fotos' ? 'text-[#F47920]' : ''}`}>
+              <Camera size={18} /><span className="text-[6px] font-bold uppercase mt-1">Fotos</span>
             </Link>
-            <Link href="/doar" className={`flex flex-col items-center ${pathname === '/doar' ? 'text-ibac-orange' : 'text-white/30'}`}>
-                <Heart size={18} />
-                <span className="text-[6px] font-bold uppercase mt-1 tracking-tighter">Doar</span>
+            <Link href="/doar" className={`flex flex-col items-center ${pathname === '/doar' ? 'text-[#F47920]' : ''}`}>
+              <Heart size={18} /><span className="text-[6px] font-bold uppercase mt-1">Doar</span>
             </Link>
-            <Link href="/perfil" className={`flex flex-col items-center ${pathname === '/perfil' ? 'text-ibac-orange' : 'text-white/30'}`}>
-                <User size={18} />
-                <span className="text-[6px] font-bold uppercase mt-1 tracking-tighter">Perfil</span>
+            <Link href="/perfil" className={`flex flex-col items-center ${pathname === '/perfil' ? 'text-[#F47920]' : ''}`}>
+              <User size={18} /><span className="text-[6px] font-bold uppercase mt-1">Perfil</span>
             </Link>
           </div>
-
         </nav>
       </div>
     </main>
