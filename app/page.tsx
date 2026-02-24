@@ -68,7 +68,7 @@ export default function Login() {
     // SOLUÇÃO DO REDIRECIONAMENTO:
     // O link agora passa pelo callback para validar o código PKCE no servidor antes de ir para a página final
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/redefinir-senha`,
+      redirectTo: `${window.location.origin}/auth/callback?next=/redefinirsenha`,
     });
 
     if (error) {
