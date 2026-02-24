@@ -46,7 +46,7 @@ export async function middleware(request: NextRequest) {
   const isLoginPage = pathname === '/'
   const isCadastroPage = pathname.startsWith('/cadastro')
   const isCallbackPage = pathname.startsWith('/auth/callback')
-  const isRedefinirPage = pathname.startsWith('/redefinir-senha')
+  const isRedefinirPage = pathname.startsWith('/redefinirsenha')
   
   // Se for qualquer uma dessas, o middleware não redireciona para o login
   const isPublicPage = isLoginPage || isCadastroPage || isCallbackPage || isRedefinirPage
