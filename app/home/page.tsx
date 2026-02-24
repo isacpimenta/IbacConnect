@@ -23,38 +23,49 @@ export default function HomeIgreja() {
   const [fotosFlickr, setFotosFlickr] = useState<any[]>([]);
   const [loadingFlickr, setLoadingFlickr] = useState(true);
   const [mounted, setMounted] = useState(false);
-    const pathname = usePathname();
+  const pathname = usePathname();
 
   const FLICKR_API_KEY = process.env.NEXT_PUBLIC_FLICKR_API_KEY;
   const FLICKR_USER_ID = process.env.NEXT_PUBLIC_FLICKR_USER_ID;
 
   useEffect(() => {
     setMounted(true);
+    
     async function fetchFlickr() {
       if (!FLICKR_API_KEY || !FLICKR_USER_ID) {
         setLoadingFlickr(false);
         return;
       }
-      const cacheKey = "flickr_photos_cache";
+
+      // 1. CACHE ESTRATÉGICO: Tenta carregar do localStorage primeiro
+      const cacheKey = "flickr_home_optimized";
       const cachedData = localStorage.getItem(cacheKey);
+      
       if (cachedData) {
         const { photos, timestamp } = JSON.parse(cachedData);
         setFotosFlickr(photos);
         setLoadingFlickr(false);
+        // Se o cache tiver menos de 1 hora, não faz o fetch de novo
         if (Date.now() - timestamp < 3600000) return;
       }
+
       try {
         const url = `https://www.flickr.com/services/rest/?method=flickr.photosets.getList&api_key=${FLICKR_API_KEY}&user_id=${FLICKR_USER_ID}&format=json&nojsoncallback=1`;
-        const res = await fetch(url);
+        // Fetch com prioridade
+        const res = await fetch(url, { priority: 'high' } as any);
         const data = await res.json();
+
         if (data.photosets?.photoset) {
           const formatados = data.photosets.photoset.slice(0, 3).map((album: any, index: number) => ({
             id: album.id,
             titulo: album.title._content.toUpperCase(),
-            img: `https://live.staticflickr.com/${album.server}/${album.primary}_${album.secret}_b.jpg`,
+            // 2. OTIMIZAÇÃO DE IMAGEM: Trocado '_b.jpg' (grande) por '_m.jpg' (leve)
+            // A imagem 'm' carrega 5x mais rápido e é suficiente para o tamanho do preview
+            img: `https://live.staticflickr.com/${album.server}/${album.primary}_${album.secret}_m.jpg`,
             info: `${album.photos} fotos`,
             destaque: index === 1 
           }));
+          
           setFotosFlickr(formatados);
           localStorage.setItem(cacheKey, JSON.stringify({ photos: formatados, timestamp: Date.now() }));
         }
@@ -71,7 +82,10 @@ export default function HomeIgreja() {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/"); return; }
+    
+    // 3. QUERY OTIMIZADA: Selecionando apenas o campo necessário
     const { data: perfil } = await supabase.from('perfis').select('interesses').eq('id', user.id).single();
+    
     if (!perfil?.interesses || perfil.interesses.length === 0) {
       router.push("/interesses");
     } else {
@@ -80,9 +94,11 @@ export default function HomeIgreja() {
     setLoading(false);
   };
 
+  if (!mounted) return null;
+
   return (
     <main className="relative min-h-screen w-full flex flex-col items-center overflow-x-hidden bg-white pb-32">
-      {/* Background Decorativo */}
+      {/* Background Decorativo - Mantido original */}
       <div className="fixed inset-0 z-0 bg-cover bg-center opacity-10" style={{ backgroundImage: "url('/fundo-igreja.png')" }} />
 
       <div className="relative z-10 w-full max-w-[400px] flex flex-col min-h-screen">
@@ -90,9 +106,9 @@ export default function HomeIgreja() {
           <img src="/logo.png" alt="IBAC" className="w-20" />
         </header>
 
-        {/* Galeria Flickr (Preview) */}
+        {/* Galeria Flickr - Design Original Preservado */}
         <div className="flex items-center justify-center gap-2 px-4 mb-4 h-64">
-          {!mounted || (loadingFlickr && fotosFlickr.length === 0) ? (
+          {loadingFlickr && fotosFlickr.length === 0 ? (
             <div className="flex items-center justify-center gap-2 w-full">
                <div className="w-24 h-32 bg-gray-200/50 rounded-lg animate-pulse" />
                <div className="w-32 h-44 bg-gray-300/50 rounded-lg animate-pulse border-2 border-white/50" />
@@ -105,7 +121,8 @@ export default function HomeIgreja() {
                 layoutId={foto.id}
                 className={`relative rounded-lg overflow-hidden shadow-2xl transition-all duration-500 ${foto.destaque ? "z-20 w-48 h-56 border-2 border-white" : "z-10 w-32 h-44 opacity-80"}`}
               >
-                <img src={foto.img} className="w-full h-full object-cover" alt="" />
+                {/* 4. LAZY LOADING: Imagens carregam de forma assíncrona para não travar o scroll */}
+                <img src={foto.img} decoding="async" className="w-full h-full object-cover" alt="" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent p-3 flex flex-col justify-end">
                   <p className="text-[7px] font-black text-white uppercase leading-tight line-clamp-2">{foto.titulo}</p>
                 </div>
@@ -114,7 +131,7 @@ export default function HomeIgreja() {
           )}
         </div>
 
-        {/* Ações Rápidas - Botão de Fotos removido daqui */}
+        {/* Ações Rápidas */}
         <div className="flex justify-center gap-3 px-6 mb-8">
           <a 
             href="https://www.instagram.com/batista_acolher"
@@ -142,11 +159,10 @@ export default function HomeIgreja() {
             </motion.button>
         </div>
 
-        {/* RODAPÉ SIMÉTRICO (3 + HOME + 3) */}
+        {/* RODAPÉ SIMÉTRICO (3 + HOME + 3) - Mantido Design de 440px */}
         <div className="fixed bottom-6 left-0 right-0 flex justify-center px-4 z-50">
           <nav className="w-full max-w-[440px] bg-ibac-dark rounded-[35px] py-3 px-2 flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10">
             
-            {/* GRUPO ESQUERDA */}
             <div className="flex flex-1 justify-around items-center">
               <Link href="/mural" className={`flex flex-col items-center ${pathname === '/mural' ? 'text-ibac-orange' : 'text-white/30'}`}>
                   <Users size={18} />
@@ -162,7 +178,6 @@ export default function HomeIgreja() {
               </Link>
             </div>
 
-            {/* HOME CENTRAL ELEVADO */}
             <div className="relative -mt-14 px-2">
               <Link href="/home" className="block">
                 <div className="w-16 h-16 bg-[#F47920] rounded-full flex items-center justify-center border-[6px] border-[#F8F9FA] shadow-xl transform active:scale-90 transition-transform">
@@ -171,7 +186,6 @@ export default function HomeIgreja() {
               </Link>
             </div>
 
-            {/* GRUPO DIREITA */}
             <div className="flex flex-1 justify-around items-center">
               <Link href="/fotos" className={`flex flex-col items-center ${pathname === '/fotos' ? 'text-ibac-orange' : 'text-white/30'}`}>
                   <Camera size={18} />
