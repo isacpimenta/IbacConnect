@@ -3,11 +3,12 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, MapPin, Instagram, MessageCircle, 
-  User, Users, Sparkles, ChevronLeft, Loader2, Video, Camera 
+  User, Users, Sparkles, ChevronLeft, Loader2, Video, Camera, Heart, Calendar as CalendarIcon
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { usePathname } from "next/navigation";
 
 export default function MuralMembros() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function MuralMembros() {
   const [membros, setMembros] = useState<any[]>([]);
   const [filtro, setFiltro] = useState("Todos");
   const [busca, setBusca] = useState("");
+  const pathname = usePathname();
 
   const categorias = ["Todos", "Música", "Jogos", "Mídia", "Social", "Esporte", "Educação"];
 
@@ -176,40 +178,53 @@ export default function MuralMembros() {
         </AnimatePresence>
       </section>
 
-      {/* RODAPÉ DE NAVEGAÇÃO PADRONIZADO (4 BOTÕES) */}
-      <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-[380px] bg-ibac-dark rounded-full py-3 px-6 flex justify-between items-center shadow-2xl z-50">
-        
-        {/* Mural (Ativo) */}
-        <Link href="/mural" className="text-ibac-orange flex flex-col items-center flex-1">
-            <Users size={20} />
-            <span className="text-[7px] font-black uppercase mt-0.5 tracking-tighter">Mural</span>
-        </Link>
+      {/* RODAPÉ SIMÉTRICO (3 + HOME + 3) */}
+      <div className="fixed bottom-6 left-0 right-0 flex justify-center px-4 z-50">
+        <nav className="w-full max-w-[440px] bg-ibac-dark rounded-[35px] py-3 px-2 flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10">
+          
+          {/* GRUPO ESQUERDA */}
+          <div className="flex flex-1 justify-around items-center">
+            <Link href="/mural" className={`flex flex-col items-center ${pathname === '/mural' ? 'text-ibac-orange' : 'text-white/30'}`}>
+                <Users size={18} />
+                <span className="text-[6px] font-bold uppercase mt-1 tracking-tighter">Mural</span>
+            </Link>
+            <Link href="/aulas" className={`flex flex-col items-center ${pathname === '/aulas' ? 'text-ibac-orange' : 'text-white/30'}`}>
+                <Video size={18} />
+                <span className="text-[6px] font-bold uppercase mt-1 tracking-tighter">Aulas</span>
+            </Link>
+            <Link href="/agenda" className={`flex flex-col items-center ${pathname === '/agenda' ? 'text-ibac-orange' : 'text-white/30'}`}>
+                <CalendarIcon size={18} />
+                <span className="text-[6px] font-bold uppercase mt-1 tracking-tighter">Agenda</span>
+            </Link>
+          </div>
 
-        {/* Aulas */}
-        <Link href="/aulas" className="text-white/40 flex flex-col items-center flex-1">
-            <Video size={20} />
-            <span className="text-[7px] font-black uppercase mt-0.5 tracking-tighter">Aulas</span>
-        </Link>
-
-        {/* Logo Home */}
-        <Link href="/home" className="relative px-2">
-            <div className="w-14 h-14 bg-ibac-orange rounded-full flex items-center justify-center -mt-14 border-[6px] border-[#F8F9FA] shadow-lg">
+          {/* HOME CENTRAL ELEVADO */}
+          <div className="relative -mt-14 px-2">
+            <Link href="/home" className="block">
+              <div className="w-16 h-16 bg-[#F47920] rounded-full flex items-center justify-center border-[6px] border-[#F8F9FA] shadow-xl transform active:scale-90 transition-transform">
                 <img src="/logo-white.png" alt="Home" className="w-8 h-8 object-contain" />
-            </div>
-        </Link>
+              </div>
+            </Link>
+          </div>
 
-        {/* Fotos */}
-        <Link href="/fotos" className="text-white/40 flex flex-col items-center flex-1">
-            <Camera size={20} />
-            <span className="text-[7px] font-black uppercase mt-0.5 tracking-tighter">Fotos</span>
-        </Link>
+          {/* GRUPO DIREITA */}
+          <div className="flex flex-1 justify-around items-center">
+            <Link href="/fotos" className={`flex flex-col items-center ${pathname === '/fotos' ? 'text-ibac-orange' : 'text-white/30'}`}>
+                <Camera size={18} />
+                <span className="text-[6px] font-bold uppercase mt-1 tracking-tighter">Fotos</span>
+            </Link>
+            <Link href="/doar" className={`flex flex-col items-center ${pathname === '/doar' ? 'text-ibac-orange' : 'text-white/30'}`}>
+                <Heart size={18} />
+                <span className="text-[6px] font-bold uppercase mt-1 tracking-tighter">Doar</span>
+            </Link>
+            <Link href="/perfil" className={`flex flex-col items-center ${pathname === '/perfil' ? 'text-ibac-orange' : 'text-white/30'}`}>
+                <User size={18} />
+                <span className="text-[6px] font-bold uppercase mt-1 tracking-tighter">Perfil</span>
+            </Link>
+          </div>
 
-        {/* Perfil */}
-        <Link href="/perfil" className="text-white/40 flex flex-col items-center flex-1">
-            <User size={20} />
-            <span className="text-[7px] font-black uppercase mt-0.5 tracking-tighter">Perfil</span>
-        </Link>
-      </nav>
+        </nav>
+      </div>
     </main>
   );
 }
