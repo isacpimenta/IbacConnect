@@ -8,16 +8,16 @@ import { usePathname } from "next/navigation";
 const diasDaSemana = ["Todos", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 
 const agendaSemanal = [
-  { dia: "Segunda", evento: "Ginástica | Segunda", horario: "07:00", local: "3° Andar", imagem: "/ginastica.png", cor: "bg-blue-500" },
+  { dia: "Segunda", evento: "Ginástica | Segunda", horario: "07:00", local: "3° Andar", imagem: "/Ginastica.png", cor: "bg-blue-500" },
   { dia: "Segunda", evento: "Jiu Jitsu", horario: "19:00", local: "Quadra", imagem: "/jiujitsu.png", cor: "bg-blue-500" },
   { dia: "Segunda", evento: "Capoeira", horario: "19:00", local: "4° Andar", imagem: "/capoeira.png", cor: "bg-blue-500" },
   { dia: "Segunda", evento: "Ballet", horario: "19:00", local: "3° Andar", imagem: "/ballet.png", cor: "bg-blue-500" },
   { dia: "Terça", evento: "Culto de Intercessão", horario: "08:00", local: "Templo", imagem: "/intercessao.png", cor: "bg-purple-500" },
   { dia: "Terça", evento: "Futebol | Terça", horario: "16:00", local: "Quadra", imagem: "/futebol.png", cor: "bg-purple-500" },
-  { dia: "Quarta", evento: "Ginástica | Quarta", horario: "08:00", local: "3° Andar", imagem: "/ginastica.png", cor: "bg-yellow-500" },
+  { dia: "Quarta", evento: "Ginástica | Quarta", horario: "08:00", local: "3° Andar", imagem: "/Ginastica.png", cor: "bg-yellow-500" },
   { dia: "Quarta", evento: "Quarta com Deus", horario: "19:30", local: "Templo", imagem: "/quarta.png", cor: "bg-yellow-500" },
   { dia: "Quinta", evento: "Futebol | Quinta", horario: "17:00", local: "Quadra", imagem: "/futebol.png", cor: "bg-green-500" },
-  { dia: "Quinta", evento: "Ginástica | Quinta", horario: "19:00", local: "3° Andar", imagem: "/ginastica.png", cor: "bg-green-500" },
+  { dia: "Quinta", evento: "Ginástica | Quinta", horario: "19:00", local: "3° Andar", imagem: "/Ginastica.png", cor: "bg-green-500" },
   { dia: "Quinta", evento: "Kingdom", horario: "19:00", local: "4° Andar", imagem: "/kdm.png", cor: "bg-green-500" },
   { dia: "Sexta", evento: "Embaixadores do Rei", horario: "19:00", local: "Sala da Embaixada", imagem: "/embaixadores.png", cor: "bg-red-500" },
   { dia: "Sexta", evento: "Mensageiras do Rei", horario: "19:00", local: "Sala 03", imagem: "/mensageiras.png", cor: "bg-red-500" },
