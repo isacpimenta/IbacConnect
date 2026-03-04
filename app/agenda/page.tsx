@@ -201,8 +201,8 @@ export default function Agenda() {
             <Link href="/fotos" className={`flex flex-col items-center ${pathname === '/fotos' ? 'text-[#F47920]' : 'text-white/30'}`}>
               <Camera size={18} /><span className="text-[6px] font-bold uppercase mt-1">Fotos</span>
             </Link>
-            <Link href="/doar" className={`flex flex-col items-center ${pathname === '/doar' ? 'text-[#F47920]' : 'text-white/30'}`}>
-              <Heart size={18} /><span className="text-[6px] font-bold uppercase mt-1">Doar</span>
+            <Link href="/pedidos" className={`flex flex-col items-center ${pathname === '/pedidos' ? 'text-[#F47920]' : 'text-white/30'}`}>
+              <Heart size={18} /><span className="text-[6px] font-bold uppercase mt-1">Pedidos</span>
             </Link>
             <Link href="/perfil" className={`flex flex-col items-center ${pathname === '/perfil' ? 'text-[#F47920]' : 'text-white/30'}`}>
               <User size={18} /><span className="text-[6px] font-bold uppercase mt-1">Perfil</span>
