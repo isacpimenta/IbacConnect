@@ -191,9 +191,9 @@ export default function HomeIgreja() {
                   <Camera size={18} />
                   <span className="text-[6px] font-bold uppercase mt-1 tracking-tighter">Fotos</span>
               </Link>
-              <Link href="/doar" className={`flex flex-col items-center ${pathname === '/doar' ? 'text-ibac-orange' : 'text-white/30'}`}>
+              <Link href="/pedidos" className={`flex flex-col items-center ${pathname === '/pedidos' ? 'text-ibac-orange' : 'text-white/30'}`}>
                   <Heart size={18} />
-                  <span className="text-[6px] font-bold uppercase mt-1 tracking-tighter">Doar</span>
+                  <span className="text-[6px] font-bold uppercase mt-1 tracking-tighter">Pedidos</span>
               </Link>
               <Link href="/perfil" className={`flex flex-col items-center ${pathname === '/perfil' ? 'text-ibac-orange' : 'text-white/30'}`}>
                   <User size={18} />
