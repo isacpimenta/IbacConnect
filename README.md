@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ⛪ IBAC - Sistema de Gestão Eclesiástica
 
-## Getting Started
+![Next.js](https://img.shields.io/badge/Next.js-000?style=for-the-badge&logo=next.js&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 
-First, run the development server:
+Aplicação Progressiva (PWA) desenvolvida para a **Igreja Batista Acolher**, focada na gestão de membros, agenda de eventos e repositório de aulas bíblicas (EBD).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛡️ Segurança de Nível Profissional
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+O projeto foi construído com foco total na proteção de dados dos membros, implementando:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+* **Proteção contra Brute Force:** Bloqueio temporário de acesso após múltiplas tentativas falhas.
+* **Anti-Bot Honeypot:** Sistema de campo invisível para mitigar cadastros automatizados por robôs.
+* **Protocolo PKCE:** Fluxo de autenticação seguro para troca de tokens via servidor.
+* **Sanitização de Inputs:** Tratamento rigoroso de dados para evitar ataques de *XSS* e *SQL Injection*.
+* **Row Level Security (RLS):** Proteção direta no banco de dados Supabase, garantindo que apenas administradores modifiquem conteúdos sensíveis.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 📱 Experiência Mobile (UX)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Otimizado para ser utilizado como um aplicativo nativo diretamente no navegador do celular:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+* **Navegação Inteligente:** Manipulação do histórico do navegador para evitar o fechamento acidental do app ao usar o botão "voltar" do Android/iOS.
+* **Touch Friendly:** Áreas de clique expandidas (mínimo de 44px) e feedback visual instantâneo em cada interação.
+* **Performance:** Interface leve construída com *Framer Motion* para transições suaves e estados de carregamento (Skeletons/Loaders).
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🚀 Funcionalidades
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 👤 Área do Membro
+* Cadastro e autenticação segura.
+* Acesso ao mural de avisos e agenda semanal.
+* Visualização de aulas, pregações e download de materiais de apoio (PDF).
+
+### ⚡ Painel Administrativo
+* **Gestão de Membros:** Controle de cargos (Membro/Admin) e busca rápida.
+* **Gerenciador de Agenda:** Criação, edição e exclusão de eventos em tempo real.
+* **Repositório de Mídia:** Upload de banners e integração com vídeos do YouTube.
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+* **Framework:** [Next.js 14](https://nextjs.org/) (App Router)
+* **Backend as a Service:** [Supabase](https://supabase.com/) (Auth, Database, Storage)
+* **Estilização:** [Tailwind CSS](https://tailwindcss.com/)
+* **Iconografia:** [Lucide React](https://lucide.dev/)
+* **Animações:** [Framer Motion](https://www.framer.com/motion/)
+
+---
+
+## ⚙️ Instalação Local
+
+1. Clone o repositório:
+   ```bash
+   git clone [https://github.com/seu-usuario/ibac-app.git](https://github.com/seu-usuario/ibac-app.git)
